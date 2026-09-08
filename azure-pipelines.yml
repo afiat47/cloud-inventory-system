@@ -14,7 +14,7 @@ pr:
       - main
 
 variables:
-  dockerRegistryServiceConnection: 'acr-connection'
+  dockerRegistryServiceConnection: 'acr-docker'
   imageRepository: 'inventory-api'
   containerRegistry: 'acrinventory123.azurecr.io'
   dockerfilePath: 'docker/Dockerfile'
