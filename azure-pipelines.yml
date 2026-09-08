@@ -1,0 +1,81 @@
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    exclude:
+      - README.md
+      - docs/*
+      - screenshots/*
+
+pr:
+  branches:
+    include:
+      - main
+
+variables:
+  dockerRegistryServiceConnection: 'acr-connection'
+  imageRepository: 'inventory-api'
+  containerRegistry: 'acrinventory123.azurecr.io'
+  dockerfilePath: 'docker/Dockerfile'
+  tag: '$(Build.BuildId)'
+  vmImageName: 'ubuntu-latest'
+  MAVEN_CACHE_FOLDER: '$(Pipeline.Workspace)/.m2/repository'
+  MAVEN_OPTS: '-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
+
+stages:
+- stage: Build
+  displayName: Build and Test
+
+  jobs:
+  - job: BuildJob
+    displayName: Build Spring Boot App
+
+    pool:
+      vmImage: $(vmImageName)
+
+    steps:
+    - task: JavaToolInstaller@0
+      displayName: Install JDK 21
+      inputs:
+        versionSpec: '21'
+        jdkArchitectureOption: 'x64'
+        jdkSourceOption: 'PreInstalled'
+
+    - task: Cache@2
+      displayName: Cache Maven Repository
+      inputs:
+        key: 'maven | "$(Agent.OS)" | api/pom.xml'
+        restoreKeys: |
+          maven | "$(Agent.OS)"
+        path: $(MAVEN_CACHE_FOLDER)
+
+    - task: Maven@4
+      displayName: Build and Run Tests
+      inputs:
+        mavenPomFile: 'api/pom.xml'
+        goals: 'clean verify'
+        options: '-B $(MAVEN_OPTS)'
+        publishJUnitResults: true
+        testResultsFiles: '**/surefire-reports/TEST-*.xml'
+        codeCoverageToolOption: 'JaCoCo'
+        javaHomeOption: 'JDKVersion'
+        jdkVersionOption: '1.21'
+
+    - task: Docker@2
+      displayName: Build and Push Image to ACR
+      inputs:
+        command: buildAndPush
+        repository: $(imageRepository)
+        dockerfile: $(dockerfilePath)
+        buildContext: '$(Build.SourcesDirectory)'
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
+          latest
+
+    - task: PublishPipelineArtifact@1
+      displayName: Publish Kubernetes Manifests
+      inputs:
+        targetPath: 'kubernetes'
+        artifact: 'manifests'
