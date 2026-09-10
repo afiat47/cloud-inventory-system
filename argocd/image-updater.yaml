@@ -1,0 +1,26 @@
+apiVersion: argocd-image-updater.argoproj.io/v1alpha1
+kind: ImageUpdater
+
+metadata:
+  name: inventory-api
+  namespace: argocd
+
+spec:
+  writeBackConfig:
+    method: git:secret:argocd/git-creds
+    gitConfig:
+      branch: main
+      writeBackTarget: kustomization
+
+  applicationRefs:
+    - namePattern: inventory-api
+      images:
+        - alias: inventory
+          imageName: acrinventory123.azurecr.io/inventory-api
+          commonUpdateSettings:
+            updateStrategy: newest-build
+            # Only numeric Build.BuildId tags - never "latest"
+            allowTags: regexp:^[0-9]+$
+          manifestTargets:
+            kustomize:
+              name: acrinventory123.azurecr.io/inventory-api

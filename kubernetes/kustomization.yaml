@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - 02-api-deployment.yaml
+  - 03-api-service.yaml
+
+# Managed by ArgoCD Image Updater (argocd/image-updater.yaml) - it commits new tags here.
+images:
+  - name: acrinventory123.azurecr.io/inventory-api
+    newTag: "8"
