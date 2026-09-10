@@ -8,4 +8,5 @@ resources:
 # Managed by ArgoCD Image Updater (argocd/image-updater.yaml) - it commits new tags here.
 images:
   - name: acrinventory123.azurecr.io/inventory-api
-    newTag: "8"
+    newTag: "9"
+    newName: acrinventory123.azurecr.io/inventory-api
