@@ -9,3 +9,4 @@ resources:
 images:
   - name: acrinventory123.azurecr.io/inventory-api
     newTag: "8"
+    newName: acrinventory123.azurecr.io/inventory-api
