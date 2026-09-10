@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: acrinventory123.azurecr.io/inventory-api:0.1.0
+          image: acrinventory123.azurecr.io/inventory-api:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
